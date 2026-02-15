@@ -1,30 +1,34 @@
-import React, { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { useEffect } from "react";
+import { fetchTrash } from "../redux/noteSlice";
 
 const Trash = () => {
-    const [deletedNotes, setDeletedNotes] = useState([]);
+  const dispatch = useDispatch();
+  const { trash } = useSelector((state) => state.notes);
+  const { token } = useSelector((state) => state.auth);
 
-    useEffect(() => {
-        // Load deleted notes from localStorage
-        const storedDeletedNotes = JSON.parse(localStorage.getItem("deletedNotes")) || [];
-        setDeletedNotes(storedDeletedNotes);
-    }, []);
+  useEffect(() => {
+    if (token) {
+      dispatch(fetchTrash());
+    }
+  }, [dispatch, token]);
 
-    return (
-        <div className="w-full h-full py-10 max-w-[1200px] mx-auto px-5 lg:px-0">
-            <h2 className="text-4xl font-bold mb-6">Recently Deleted Notes</h2>
-            
-            {deletedNotes.length === 0 ? (
-                <p className="text-xl text-center">No deleted notes available.</p>
-            ) : (
-                deletedNotes.map((note, index) => (
-                    <div key={index} className="border border-red-300 p-4 rounded-md shadow-md mb-4">
-                        <h3 className="text-2xl font-semibold text-red-900">{note.title}</h3>
-                        <p className="text-red-400">{note.content}</p>
-                    </div>
-                ))
-            )}
-        </div>
-    );
+  return (
+    <div className="p-10">
+      <h1 className="text-3xl font-bold mb-6">Recently Deleted</h1>
+
+      {trash.length > 0 ? (
+        trash.map((note) => (
+          <div key={note._id} className="border p-4 mb-4">
+            <h2 className="font-bold">{note.title}</h2>
+            <p>{note.content}</p>
+          </div>
+        ))
+      ) : (
+        <p>No deleted notes</p>
+      )}
+    </div>
+  );
 };
 
 export default Trash;

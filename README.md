@@ -11,6 +11,9 @@
 ✅ Copy to Clipboard – Quickly copy the note's content with a single click.
 ✅ Real-time Toast Notifications – Get instant feedback for actions.
 ✅ Modern & Responsive UI – Works smoothly on all devices.
+✅User Authentication (Sign In/Sign Up)
+✅Database Integration (MongoDB)
+
 </pre>
 <br><br>
 
@@ -26,8 +29,6 @@
 <h2>💡 Future Enhancements</h2>
 
 <pre>
-🔹 User Authentication (Sign In/Sign Up)
-🔹 Database Integration (MongoDB/Firebase)
 🔹 Dark Mode Support
 🔹 Drag & Drop Note Management
 </pre>

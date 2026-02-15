@@ -1,80 +1,100 @@
-import {createBrowserRouter, RouterProvider} from 'react-router-dom'
-import Navbar from './components/Navbar'
-import Home from './components/Home'
-import Note from './components/AllNotes'
-import ViewNote from './components/ViewNotes'
-import Trash from './components/Trash';
-import About from './components/About';
-import Footer from './components/Footer'
-import LoginSignUp from './components/SignIn'
+import { createBrowserRouter, RouterProvider } from "react-router-dom";
 
-const router = createBrowserRouter(
-  [
-    {
-      path: "/",
-      element:
-      <div>
-        <Navbar/>
-        <Home/>
-        <Footer/>
-      </div>
-    },
+import Navbar from "./components/Navbar";
+import Home from "./components/Home";
+import Note from "./components/AllNotes";
+import ViewNote from "./components/ViewNotes";
+import Trash from "./components/Trash";
+import About from "./components/About";
+import Footer from "./components/Footer";
 
-    {
-      path: "/notes",
-      element:
-      <div>
-        <Navbar/>
-        <Note/>
-        <Footer/>
-      </div>
-    },
+import SignIn from "./components/SignIn";
+import SignUp from "./components/SignUp";
 
-    {
-      path: "/notes/:id",
-      element:
-      <div>
-        <Navbar/>
-        <ViewNote/>
-        <Footer/>
-      </div>
-    },
-    {
-      path: "/trash",
-      element: (
+import PrivateRoute from "./components/PrivateRoute";
+
+
+
+// Layout wrapper for pages WITH navbar
+const MainLayout = ({ children }) => {
+  return (
+    <>
+      <Navbar />
+      {children}
+      <Footer />
+    </>
+  );
+};
+
+
+const router = createBrowserRouter([
+  {
+    path: "/",
+    element: (
+      <MainLayout>
+        <Home />
+      </MainLayout>
+    ),
+  },
+
+  {
+    path: "/notes",
+    element: (
+      <PrivateRoute>
+        <div>
+          <Navbar />
+          <Note />
+          <Footer />
+        </div>
+      </PrivateRoute>
+    ),
+  },
+
+  {
+    path: "/notes/:id",
+    element: (
+      <MainLayout>
+        <ViewNote />
+      </MainLayout>
+    ),
+  },
+
+  {
+    path: "/trash",
+    element: (
+      <PrivateRoute>
         <div>
           <Navbar />
           <Trash />
-          <Footer/>
+          <Footer />
         </div>
-      ),
-    },
-    {
-      path: "/about",
-      element: (
-        <div>
-          <Navbar />
-          <About />
-          <Footer/>
-        </div>
-      ),
-    },
-    {
-      path: "/login",
-      element: (
-        <LoginSignUp/>
-      ),
-    },
-  ]
-)
+      </PrivateRoute>
+    ),
+  },
+
+  {
+    path: "/about",
+    element: (
+      <MainLayout>
+        <About />
+      </MainLayout>
+    ),
+  },
+
+  // AUTH ROUTES (NO NAVBAR)
+  {
+    path: "/login",
+    element: <SignIn />,
+  },
+
+  {
+    path: "/signup",
+    element: <SignUp />,
+  },
+]);
 
 function App() {
-
-  return (
-    <div>
-      <RouterProvider router={router} />
-    </div>
-  )
+  return <RouterProvider router={router} />;
 }
 
-export default App
+export default App;

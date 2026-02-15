@@ -1,64 +1,98 @@
-import { createSlice } from '@reduxjs/toolkit'
-import toast from 'react-hot-toast';
+import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import API from "../services/api";
+import toast from "react-hot-toast";
 
-const initialState = {
-  notes: localStorage.getItem("notes")
-    ? JSON.parse(localStorage.getItem("notes"))
-    : []
-    ,
 
-}
+// FETCH NOTES
+export const fetchNotes = createAsyncThunk(
+  "notes/fetchNotes",
+  async (_, thunkAPI) => {
+    try {
+      const { data } = await API.get("/notes");
+      return data;
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error.response.data);
+    }
+  }
+);
 
-export const noteSlice = createSlice({
-  name: 'note',
-  initialState,
-  reducers: {
-    addToNotes: (state, action) => {
-      const note = action.payload;
-      state.notes.push(note);
-      localStorage.setItem("notes", JSON.stringify(state.notes));
-      toast.success("Notes Created Successfully!")
-    },
+// CREATE NOTE
+export const createNote = createAsyncThunk(
+  "notes/createNote",
+  async (noteData, thunkAPI) => {
+    try {
+      const { data } = await API.post("/notes", noteData);
+      return data;
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error.response.data);
+    }
+  }
+);
 
-    updateToNotes: (state, action) => {
-        const note = action.payload;
-        const index = state.notes.findIndex((item) =>
-        item._id === note._id);
+// DELETE NOTE
+export const deleteNote = createAsyncThunk(
+  "notes/deleteNote",
+  async (id, thunkAPI) => {
+    try {
+      await API.delete(`/notes/${id}`);
+      return id;
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error.response.data);
+    }
+  }
+);
 
-        if(index >= 0){
-            state.notes[index] = note;
+// FETCH TRASH
+export const fetchTrash = createAsyncThunk(
+  "notes/fetchTrash",
+  async (_, thunkAPI) => {
+    try {
+      const { data } = await API.get("/notes/trash");
+      return data;
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error.response.data);
+    }
+  }
+);
 
-            localStorage.setItem("notes",  JSON.stringify(state.notes));
-
-            toast.success("Notes Updated!");
-        }
-    },
-
-    resetAllNotes: (state, action) => {
-        state.notes = [];
-
-        localStorage.removeItem("notes");
-    },
-
-    removeFromNotes: (state, action) => {
-        const noteId = action.payload;
-        console.log(noteId);
-
-        const index = state.notes.findIndex((item) => 
-        item._id === noteId);
-
-        if(index >= 0){
-            state.notes.splice(index, 1);
-
-            localStorage.setItem("notes",  JSON.stringify(state.notes));
-
-            toast.success("Notes Deleted!");
-        }
-    },
+const noteSlice = createSlice({
+  name: "notes",
+  initialState: {
+    notes: [],
+    trash: [],
+    loading: false,
   },
-})
+  reducers: {},
+  extraReducers: (builder) => {
+    builder
+      .addCase(fetchNotes.fulfilled, (state, action) => {
+        state.notes = action.payload;
+      })
+      //create note
+      .addCase(createNote.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(createNote.fulfilled, (state, action) => {
+        state.loading = false;
+        state.notes.unshift(action.payload);
+        toast.success("Note Created Successfully");
+      })
+      .addCase(createNote.rejected, (state) => {
+        state.loading = false;
+        toast.error("Failed to create note");
+      })
+      //delete note
+      .addCase(deleteNote.fulfilled, (state, action) => {
+        state.notes = state.notes.filter(
+          (note) => note._id !== action.payload
+        );
+        toast.success("Moved to Trash");
+      })
 
-// Action creators are generated for each case reducer function
-export const { addToNotes, updateToNotes, resetAllNotes, removeFromNotes } = noteSlice.actions;
+      .addCase(fetchTrash.fulfilled, (state, action) => {
+        state.trash = action.payload;
+      });
+  },
+});
 
 export default noteSlice.reducer;

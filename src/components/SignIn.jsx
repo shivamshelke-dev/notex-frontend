@@ -1,97 +1,116 @@
-import React, { useState } from 'react';
-import Logo from '../assets/NotexLogo2.png';
-import Glogo from '../assets/G logo Google.png'
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { loginUser } from "../redux/authSlice";
+import toast from "react-hot-toast";
+
 const SignIn = () => {
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
 
+  const { loading } = useSelector((state) => state.auth);
 
-    const [isChecked, setIsChecked] = useState(false);
+  const [formData, setFormData] = useState({
+    email: "",
+    password: "",
+  });
 
-    const handleCheckboxChange = () => {
-        setIsChecked(!isChecked);
-    };
+  const handleChange = (e) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value,
+    });
+  };
 
-    return (
-        <div className='w-full font-serif'>
-            <div className='w-[35%] h-fit mt-10 mb-1 mx-auto border border-gray-300 rounded-md flex flex-col   '>
+  const handleLogin = async () => {
+    if (!formData.email || !formData.password) {
+      toast.error("All fields are required");
+      return;
+    }
 
-                <div className='flex m-2 mt-5 place-content-center'>
-                    <img src={Logo} alt="Logo" className='h-28' />
-                </div>
-                <div className='flex  m-2 place-content-center '>
-                    <h2 className='text-gray-900 font-medium text-lg'>Sign In</h2>
-                </div>
-                <section className='flex  place-content-center'>
-                    <div className='flex justify-center items-center m-4 border border-gray-500 w-[80%] px-5 py-[0.4rem] rounded-full gap-x-2 hover:bg-blue-50 font-sans '>
-                        <img src={Glogo} className='w-5 h-5 text-blue-500' />
-                        <a href="#"
-                            className='font-semibold text-blue-500'
-                        >Sign in with Google</a>
-                    </div>
-                </section>
+    const resultAction = await dispatch(loginUser(formData));
 
-                <p className='my-4 text-gray-600 text-center'>or</p>
+    if (loginUser.fulfilled.match(resultAction)) {
+      toast.success("Login successful");
+      navigate("/notes");
+    } else {
+      toast.error(
+        resultAction.payload?.message || "Invalid credentials"
+      );
+    }
+  };
 
-                <div className='w-full'>
-                    <div className='flex flex-col items-center'>
-                        <input type="email"
-                            placeholder='Email*'
-                            className='border border-gray-500 rounded p-2 w-[80%] h-12 m-3'
-                        />
-                    </div>
+  return (
+    <div
+      className="min-h-screen flex items-center justify-center bg-cover bg-center "
+      style={{ backgroundImage: "url('/bgImg.jpg')" }}
+    >
+      <div className="w-[1100px] h-[600px] bg-white rounded-xl shadow-xl flex overflow-hidden text-center">
 
-                    <div className='flex flex-col items-center'>
-                        <input type="password"
-                            placeholder='Password*'
-                            className='border border-gray-500 rounded p-2 w-[80%] h-12 mx-3 mt-3'
-                        />
-                    </div>
-                </div>
-
-                <div className='flex justify-end mr-[2.9rem]'>
-                    <a href="#"
-                        className='text-blue-700 underline  text-sm'
-                    >Forgot password?</a>
-                </div>
-
-                <div className='flex flex-row gap-x-1 place-content-start ml-12 m-3'>
-                    <input
-                        type="checkbox"
-                        id="rememberMe"
-                        checked={isChecked}
-                        onChange={handleCheckboxChange}
-                        className="cursor-pointer"
-                    />
-                    <label htmlFor="rememberMe" className="cursor-pointer font-sans" >
-                        Remember me
-                    </label>
-                </div>
-
-                <div className='flex flex-row justify-between mt-3 mb-6 mx-10 mr-12 font-sans font-semibold'>
-                    <a href="#"
-                        className='px-2 py-1 rounded text-blue-700 text-md hover:bg-blue-50'
-                    >Create account</a>
-
-                    <button className='bg-blue-700 rounded-full px-6 py-[0.6rem] text-white hover:shadow-md text-sm hover:bg-blue-900 '>
-                        Sign in
-                    </button>
-                </div>
+        {/* LEFT */}
+        <div className="w-1/2 flex flex-col justify-center px-14">
+          <div className="text-black-600 text-3xl font-bold mb-6">
+            <div className="flex justify-center items-center text-black-600 text-3xl font-bold">
+              <img
+                src="/NotexPNG.png"
+                alt="logo"
+                className="w-[20%]"
+              />
             </div>
+            Note<span className="text-blue-700">X</span>
+          </div>
 
-            <div className='w-[35%] flex place-content-center mx-auto'>
-                <p className='text-[0.9rem] font-sans'>
-                    This site is protected by reCAPTCHA and the NoteX{' '}
-                    <span className='text-blue-600 underline font-semibold'>
-                        <a href="#">Privacy Policy</a>
-                    </span>
-                    {' '}and{' '}
-                    <span className='text-blue-600 underline font-semibold'>
-                        <a href="#">Terms of Service</a>
-                    </span>
-                    {' '}apply.
-                </p>
-            </div>
+          <h1 className="text-3xl font-semibold mb-6">
+            Welcome Back!
+          </h1>
+
+          
+
+          <input
+            type="email"
+            name="email"
+            placeholder="Email address"
+            value={formData.email}
+            onChange={handleChange}
+            className="w-full border border-gray-300 rounded-md px-4 py-3 mb-4 focus:ring-2 focus:ring-green-500"
+          />
+
+          <input
+            type="password"
+            name="password"
+            placeholder="Password"
+            value={formData.password}
+            onChange={handleChange}
+            className="w-full border border-gray-300 rounded-md px-4 py-3 mb-6 focus:ring-2 focus:ring-green-500"
+          />
+
+          <button
+            onClick={handleLogin}
+            disabled={loading}
+            className="w-full bg-green-600 text-white py-3 rounded-md hover:bg-green-700 transition"
+          >
+            {loading ? "Logging in..." : "Log In"}
+          </button>
+
+          <p className="text-sm mt-6">
+            Don’t have an account?{" "}
+            <Link to="/signup" className="text-green-600 font-medium">
+              Sign up
+            </Link>
+          </p>
         </div>
-    )
-}
+
+        {/* RIGHT */}
+        <div className="w-1/2 flex items-center justify-center bg-[#f8f8f8]">
+          <img
+            src="/sign up image.svg"
+            alt="illustration"
+            className="w-[80%]"
+          />
+        </div>
+      </div>
+    </div>
+  );
+};
 
 export default SignIn;
